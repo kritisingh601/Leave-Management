@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2023-07-07 07:00:14">
+<sys_script action="INSERT_OR_UPDATE">
+<abort_action>false</abort_action>
+<access>package_private</access>
+<action_delete>false</action_delete>
+<action_insert>true</action_insert>
+<action_query>false</action_query>
+<action_update>true</action_update>
+<active>true</active>
+<add_message>false</add_message>
+<advanced>true</advanced>
+<change_fields>false</change_fields>
+<client_callable>false</client_callable>
+<collection>x_intep_requ_leave_leave_request</collection>
+<condition/>
+<description/>
+<execute_function>false</execute_function>
+<filter_condition table="x_intep_requ_leave_leave_request">approval=approved^status=submitted^EQ<item goto="false" or="false" field="approval" endquery="false" value="approved" operator="=" newquery="false"/>
+<item goto="false" or="false" field="status" endquery="false" value="submitted" operator="=" newquery="false"/>
+<item goto="false" or="false" field="" endquery="true" value="" operator="=" newquery="false"/>
+</filter_condition>
+<is_rest>false</is_rest>
+<message/>
+<name>Calculate Leaves - 2.0</name>
+<order>100</order>
+<priority>100</priority>
+<rest_method display_value=""/>
+<rest_method_text/>
+<rest_service display_value=""/>
+<rest_service_text/>
+<rest_variables/>
+<role_conditions/>
+<script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+	// Add your code here
+	var gr=new GlideRecord('x_intep_requ_leave_leave_bucket');
+	gr.addQuery('employee',current.requested_by);
+	gr.addQuery('leave_type',current.leave_type);
+	gr.query();
+	if(gr.next())
+		{
+			gr.balance=gr.balance - current.duration;
+			gr.taken=gr.taken + current.duration;
+			gr.update();
+		}
+
+})(current, previous);]]></script>
+<sys_class_name>sys_script</sys_class_name>
+<sys_created_by>arun.sharma</sys_created_by>
+<sys_created_on>2023-01-10 19:15:59</sys_created_on>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>572f8ef187d42510f0bd419d0ebb35da</sys_id>
+<sys_mod_count>4</sys_mod_count>
+<sys_name>Calculate Leaves - 2.0</sys_name>
+<sys_overrides display_value=""/>
+<sys_package display_value="Leave Requests Managements" source="x_intep_requ_leave">5807b9b587542510f0bd419d0ebb3588</sys_package>
+<sys_policy/>
+<sys_scope display_value="Leave Requests Managements">5807b9b587542510f0bd419d0ebb3588</sys_scope>
+<sys_update_name>sys_script_572f8ef187d42510f0bd419d0ebb35da</sys_update_name>
+<sys_updated_by>Shareef.b</sys_updated_by>
+<sys_updated_on>2023-01-23 09:09:20</sys_updated_on>
+<template/>
+<when>after</when>
+</sys_script>
+<sys_script action="INSERT_OR_UPDATE">
+<abort_action>false</abort_action>
+<access>package_private</access>
+<action_delete>false</action_delete>
+<action_insert>true</action_insert>
+<action_query>false</action_query>
+<action_update>true</action_update>
+<active>true</active>
+<add_message>false</add_message>
+<advanced>true</advanced>
+<change_fields>false</change_fields>
+<client_callable>false</client_callable>
+<collection>sys_user</collection>
+<condition/>
+<description/>
+<execute_function>false</execute_function>
+<filter_condition table="sys_user">employee_numberISNOTEMPTY^EQ<item goto="false" or="false" field="employee_number" endquery="false" value="" operator="ISNOTEMPTY" newquery="false"/>
+<item goto="false" or="false" field="" endquery="true" value="" operator="=" newquery="false"/>
+</filter_condition>
+<is_rest>false</is_rest>
+<message/>
+<name>Create Leave Bucket - 2.0</name>
+<order>100</order>
+<priority>100</priority>
+<rest_method display_value=""/>
+<rest_method_text/>
+<rest_service display_value=""/>
+<rest_service_text/>
+<rest_variables/>
+<role_conditions/>
+<script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+
+    // Add your code here
+    var gr = new GlideRecord('x_intep_requ_leave_leave_policy');
+    gr.addQuery('country.name', current.location.country);
+    gr.query();
+    if (gr.next()) {
+        if (gr.leave_assignment == 'y') {
+            var gdt = new GlideDateTime();
+            var currentMonth = gdt.getMonthLocalTime() - 1; //Current month of user
+            var monthsLeft = 12 - currentMonth; // Months left for a user
+            var perMonth = gr.leaves / 12; // How many leaves are there for month 
+            var totalLeaves = perMonth;
+            var leaveBucket = new GlideRecord('x_intep_requ_leave_leave_bucket');
+            leaveBucket.initialize();
+            leaveBucket.leave_type = gr.leave_type;
+            leaveBucket.accrued = totalLeaves;
+            leaveBucket.balance = totalLeaves;
+            leaveBucket.taken = 0;
+            leaveBucket.employee = current.sys_id;
+            leaveBucket.insert();
+
+        } else if (gr.leave_assignment == 'm') {
+            var perMonthM = gr.Leaves / 12;
+            var leaveBucketM = new GlideRecord('x_intep_requ_leave_leave_bucket');
+            leaveBucketM.initialize();
+            leaveBucketM.leave_type = gr.leave_type;
+            leaveBucketM.accrued = perMonthM;
+            leaveBucketM.balance = perMonthM;
+            leaveBucketM.taken = 0;
+            leaveBucketM.employee = current.sys_id;
+            leaveBucketM.insert();
+        }
+    }
+
+})(current, previous);
+]]></script>
+<sys_class_name>sys_script</sys_class_name>
+<sys_created_by>arun.sharma</sys_created_by>
+<sys_created_on>2023-01-10 19:07:31</sys_created_on>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>173d8a3187d42510f0bd419d0ebb3582</sys_id>
+<sys_mod_count>3</sys_mod_count>
+<sys_name>Create Leave Bucket - 2.0</sys_name>
+<sys_overrides display_value=""/>
+<sys_package display_value="Leave Requests Managements" source="x_intep_requ_leave">5807b9b587542510f0bd419d0ebb3588</sys_package>
+<sys_policy/>
+<sys_scope display_value="Leave Requests Managements">5807b9b587542510f0bd419d0ebb3588</sys_scope>
+<sys_update_name>sys_script_173d8a3187d42510f0bd419d0ebb3582</sys_update_name>
+<sys_updated_by>arun.sharma</sys_updated_by>
+<sys_updated_on>2023-01-11 05:53:44</sys_updated_on>
+<template/>
+<when>async_always</when>
+</sys_script>
+<sys_script action="INSERT_OR_UPDATE">
+<abort_action>false</abort_action>
+<access>package_private</access>
+<action_delete>false</action_delete>
+<action_insert>true</action_insert>
+<action_query>false</action_query>
+<action_update>true</action_update>
+<active>true</active>
+<add_message>false</add_message>
+<advanced>true</advanced>
+<change_fields>false</change_fields>
+<client_callable>false</client_callable>
+<collection>x_intep_requ_leave_leave_request</collection>
+<condition/>
+<description/>
+<execute_function>false</execute_function>
+<filter_condition table="x_intep_requ_leave_leave_request"/>
+<is_rest>false</is_rest>
+<message/>
+<name>Duration Validations - 2.0</name>
+<order>100</order>
+<priority>100</priority>
+<rest_method display_value=""/>
+<rest_method_text/>
+<rest_service display_value=""/>
+<rest_service_text/>
+<rest_variables/>
+<role_conditions/>
+<script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+	if(current.duration > current.balance){
+		gs.addErrorMessage("Duration is greater than Balance");
+		current.setAbortAction(true);
+	}
+
+})(current, previous);]]></script>
+<sys_class_name>sys_script</sys_class_name>
+<sys_created_by>arun.sharma</sys_created_by>
+<sys_created_on>2023-01-10 19:14:41</sys_created_on>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>d4eec2f187d42510f0bd419d0ebb35f6</sys_id>
+<sys_mod_count>2</sys_mod_count>
+<sys_name>Duration Validations - 2.0</sys_name>
+<sys_overrides display_value=""/>
+<sys_package display_value="Leave Requests Managements" source="x_intep_requ_leave">5807b9b587542510f0bd419d0ebb3588</sys_package>
+<sys_policy/>
+<sys_scope display_value="Leave Requests Managements">5807b9b587542510f0bd419d0ebb3588</sys_scope>
+<sys_update_name>sys_script_d4eec2f187d42510f0bd419d0ebb35f6</sys_update_name>
+<sys_updated_by>arun.sharma</sys_updated_by>
+<sys_updated_on>2023-01-11 06:30:24</sys_updated_on>
+<template/>
+<when>before</when>
+</sys_script>
+<sys_script action="INSERT_OR_UPDATE">
+<abort_action>false</abort_action>
+<access>package_private</access>
+<action_delete>false</action_delete>
+<action_insert>true</action_insert>
+<action_query>false</action_query>
+<action_update>false</action_update>
+<active>true</active>
+<add_message>false</add_message>
+<advanced>true</advanced>
+<change_fields>false</change_fields>
+<client_callable>false</client_callable>
+<collection>x_intep_requ_leave_leave_bucket</collection>
+<condition/>
+<description/>
+<execute_function>false</execute_function>
+<filter_condition table="x_intep_requ_leave_leave_bucket"/>
+<is_rest>false</is_rest>
+<message/>
+<name>Validation of duplicate in LB - 2.0</name>
+<order>100</order>
+<priority>100</priority>
+<rest_method display_value=""/>
+<rest_method_text/>
+<rest_service display_value=""/>
+<rest_service_text/>
+<rest_variables/>
+<role_conditions/>
+<script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+
+    var gr = new GlideRecord('x_intep_requ_leave_leave_bucket');
+
+    gr.addQuery('employee', current.employee);
+	gr.addQuery('leave_type', current.leave_type);
+
+    gr.query();
+
+    if (gr.next()) {
+
+        gs.addInfoMessage('There is duplicate value for limit in the table');
+
+        current.setAbortAction(true);
+
+    }
+
+})(current, previous);]]></script>
+<sys_class_name>sys_script</sys_class_name>
+<sys_created_by>arun.sharma</sys_created_by>
+<sys_created_on>2023-01-10 19:11:12</sys_created_on>
+<sys_domain>global</sys_domain>
+<sys_domain_path>/</sys_domain_path>
+<sys_id>d51e8e7187d42510f0bd419d0ebb3522</sys_id>
+<sys_mod_count>3</sys_mod_count>
+<sys_name>Validation of duplicate in LB - 2.0</sys_name>
+<sys_overrides display_value=""/>
+<sys_package display_value="Leave Requests Managements" source="x_intep_requ_leave">5807b9b587542510f0bd419d0ebb3588</sys_package>
+<sys_policy/>
+<sys_scope display_value="Leave Requests Managements">5807b9b587542510f0bd419d0ebb3588</sys_scope>
+<sys_update_name>sys_script_d51e8e7187d42510f0bd419d0ebb3522</sys_update_name>
+<sys_updated_by>arun.sharma</sys_updated_by>
+<sys_updated_on>2023-01-11 08:46:45</sys_updated_on>
+<template/>
+<when>before</when>
+</sys_script>
+</unload>
