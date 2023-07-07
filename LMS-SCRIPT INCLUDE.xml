@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload unload_date="2023-07-07 07:06:37">
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>package_private</access>
+<active>true</active>
+<api_name>x_intep_requ_leave.lmsAjax_2</api_name>
+<caller_access/>
+<client_callable>true</client_callable>
+<description/>
+<name>lmsAjax_2</name>
+<script><![CDATA[var lmsAjax_2 = Class.create();
+lmsAjax_2.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+    getDateDiff: function() {
+        var d1 = new GlideDate();
+        d1.setDisplayValue(this.getParameter('sysparm_start'));
+        var d2 = new GlideDate();
+        d2.setDisplayValue(this.getParameter('sysparm_end'));
+
+        var duration = GlideDate.subtract(d1, d2);
+        return duration.getNumericValue();
+
+    },
+
+    getDateDiffSchedule: function() {
+        var d1 = new GlideDateTime();
+        //gs.info(d1);
+        gs.info(this.getParameter('sysparm_start'));
+        var sd = this.getParameter('sysparm_start');
+        //gs.info('sd'+sd);
+        d1.setValue(sd + ' 00:00:00');
+        var d2 = new GlideDateTime();
+        var ed = this.getParameter('sysparm_end');
+        d2.setValue(ed + ' 23:59:59');
+        gs.info(this.getParameter('sysparm_end'));
+        gs.info('d1' + d1);
+        gs.info('d2' + d2);
+        var schedule = new GlideSchedule();
+        schedule.load("63c04ec48718a110f7c50e1d0ebb3533");
+        var duration = schedule.duration(d1, d2);
+        gs.info(duration.getDurationValue());
+        return duration.getRoundedDayPart();
+
+
+    },
+
+    getLeaveBucket: function() {
+        var gr = new GlideRecord('x_intep_requ_leave_leave_bucket');
+        gr.addQuery('employee', this.getParameter('sysparm_user'));
+        gr.addQuery('leave_type', this.getParameter('sysparm_leavetype'));
+        gr.query();
+        if (gr.next()) {
+            var leaveDetails = {};
+            leaveDetails.accrued = '' + gr.accrued;
+            leaveDetails.balance = '' + gr.balance;
+            leaveDetails.taken = '' + gr.taken;
+            return JSON.stringify(leaveDetails);
+
+        }
+    },
+
+
+    type: 'lmsAjax_2'
+});]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_created_by>arun.sharma</sys_created_by>
+<sys_created_on>2023-01-10 18:52:47</sys_created_on>
+<sys_id>97d90e3d87942510f0bd419d0ebb35f0</sys_id>
+<sys_mod_count>1</sys_mod_count>
+<sys_name>lmsAjax_2</sys_name>
+<sys_package display_value="Leave Requests Managements" source="x_intep_requ_leave">5807b9b587542510f0bd419d0ebb3588</sys_package>
+<sys_policy>read</sys_policy>
+<sys_scope display_value="Leave Requests Managements">5807b9b587542510f0bd419d0ebb3588</sys_scope>
+<sys_update_name>sys_script_include_97d90e3d87942510f0bd419d0ebb35f0</sys_update_name>
+<sys_updated_by>arun.sharma</sys_updated_by>
+<sys_updated_on>2023-01-10 18:56:48</sys_updated_on>
+</sys_script_include>
+<sys_script_include action="INSERT_OR_UPDATE">
+<access>package_private</access>
+<active>true</active>
+<api_name>x_intep_requ_leave.WorkingDay_2</api_name>
+<caller_access/>
+<client_callable>true</client_callable>
+<description/>
+<name>WorkingDay_2</name>
+<script><![CDATA[var WorkingDay_2 = Class.create();
+WorkingDay_2.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+    WorkDay: function() {
+        var selected_date = this.getParameter("sysparm_date");
+        var d = new GlideDateTime(selected_date);
+        var dayCount = d.getDayOfWeekLocalTime();
+        gs.info("date count - " + dayCount);
+        if (dayCount == 5 || dayCount == 6) { // 5 - sat & 6 - sun
+            return true;
+        } else {
+            return false;
+        }
+    },
+    type: 'WorkingDay_2'
+});]]></script>
+<sys_class_name>sys_script_include</sys_class_name>
+<sys_created_by>arun.sharma</sys_created_by>
+<sys_created_on>2023-01-10 18:59:39</sys_created_on>
+<sys_id>007b4abd87942510f0bd419d0ebb35f7</sys_id>
+<sys_mod_count>1</sys_mod_count>
+<sys_name>WorkingDay_2</sys_name>
+<sys_package display_value="Leave Requests Managements" source="x_intep_requ_leave">5807b9b587542510f0bd419d0ebb3588</sys_package>
+<sys_policy>read</sys_policy>
+<sys_scope display_value="Leave Requests Managements">5807b9b587542510f0bd419d0ebb3588</sys_scope>
+<sys_update_name>sys_script_include_007b4abd87942510f0bd419d0ebb35f7</sys_update_name>
+<sys_updated_by>arun.sharma</sys_updated_by>
+<sys_updated_on>2023-01-10 19:00:47</sys_updated_on>
+</sys_script_include>
+</unload>
